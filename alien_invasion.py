@@ -14,11 +14,16 @@ class AlienInvasion:
 
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((self.settings.screen_width,
+            self.settings.screen_height), pygame.SHOWN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
 
-        self.clock = pygame.time.Clock()
+        self.fps_clock = pygame.time.Clock()
+        self.bullet_clock = pygame.time.Clock()
+
+        self.bullet_cooldown_count = -1
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -35,9 +40,9 @@ class AlienInvasion:
             self._check_events()
             self.ship.update()
             self._update_aliens()
-            self.bullets.update()
+            self._update_bullets()
             self._update_screen()
-            self.clock.tick(60)
+            self.fps_clock.tick(60)
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -82,7 +87,28 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
-        self.bullets.add(Bullet(self))
+
+        new_tick = self.bullet_clock.tick()
+        if new_tick + self.bullet_cooldown_count >= 500 or \
+                self.bullet_cooldown_count == -1: 
+            self.bullets.add(Bullet(self))
+            self.bullet_cooldown_count = 0
+        else:
+            self.bullet_cooldown_count += new_tick
+
+    def _update_bullets(self):
+        self.bullets.update()
+
+        for b in self.bullets:
+            if b.rect.bottom <= 0:
+                self.bullets.remove(b)
+
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens,
+            True, True)
+
+        if not self.aliens:
+            self.bullets.empty()
+            self._create_fleet()
 
     def _create_fleet(self):
         """Create the fleet of aliens."""

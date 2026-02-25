@@ -21,9 +21,6 @@ class Bullet(Sprite):
     # Only used by Group.update()
     def update(self):
         """Move the bullet up the screen."""
-        if self.rect.bottom < 0:
-            self.kill()
-            return
 
         self.y -= self.settings.bullet_speed
         self.rect.y = self.y
