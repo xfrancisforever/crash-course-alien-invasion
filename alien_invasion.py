@@ -1,4 +1,5 @@
 from ship import Ship
+from alien import Alien
 from settings import Settings
 from bullet import Bullet
 import pygame
@@ -21,6 +22,9 @@ class AlienInvasion:
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
+        self.aliens = pygame.sprite.Group()
+
+        self._create_fleet()
 
         pygame.display.set_caption("Alien Invasion")
         
@@ -48,6 +52,7 @@ class AlienInvasion:
 
         self.screen.fill(self.settings.bg_colour)
         self.ship.blitme()
+        self.aliens.draw(self.screen)
         
         for b in self.bullets.sprites():
             b.draw_bullet()
@@ -77,7 +82,35 @@ class AlienInvasion:
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
         self.bullets.add(Bullet(self))
-        
+
+    def _create_fleet(self):
+        """Create the fleet of aliens."""
+
+        alien = Alien(self)
+        alien_width, alien_height = alien.rect.size
+
+        current_x, current_y = alien_width, alien_height
+        while current_y < (self.settings.screen_height - 3  * 
+            alien_height):
+            while current_x < (self.settings.screen_width - 2 * 
+                alien_width):
+                self._create_alien(current_x, current_y)
+                current_x += 2 * alien_width
+
+            current_x = alien_width
+            current_y += 2 * alien_height
+
+    def _create_alien(self, x_position, y_position):
+        """Create an alien and place it in the row."""
+
+        new_alien = Alien(self)
+
+        new_alien.x = x_position
+        new_alien.rect.x = x_position
+        new_alien.rect.y = y_position
+
+        self.aliens.add(new_alien)
+
 if __name__ == '__main__':
     ai = AlienInvasion()
     ai.run_game()
