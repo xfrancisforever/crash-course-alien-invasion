@@ -3,6 +3,7 @@ from alien import Alien
 from settings import Settings
 from bullet import Bullet
 from game_stats import GameStats
+from button import Button
 import pygame
 import sys
 from time import sleep
@@ -15,13 +16,12 @@ class AlienInvasion:
         pygame.init()
 
         self.bullet_cooldown_count = -1
-        self.game_active = True
+        self.game_active = False
 
         self.settings = Settings()
 
         #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((self.settings.screen_width,
-            self.settings.screen_height), pygame.SHOWN)
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
 
@@ -32,6 +32,7 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stats = GameStats(self)
+        self.play_button = Button(self, "Play")
 
         self._create_fleet()
 
@@ -55,6 +56,9 @@ class AlienInvasion:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
@@ -66,10 +70,13 @@ class AlienInvasion:
         self.screen.fill(self.settings.bg_colour)
         self.ship.blitme()
         self.aliens.draw(self.screen)
-        
+
         for b in self.bullets.sprites():
             b.draw_bullet()
 
+        if not self.game_active:
+            self.play_button.draw_button()
+        
         pygame.display.flip()
 
     def _check_keydown_events(self, event):
@@ -199,6 +206,12 @@ class AlienInvasion:
             if a.check_edges():
                 self._change_fleet_direction()
                 break
+
+    def _check_play_button(self, mouse_pos):
+        """Start a new game when the player clicks Play."""
+
+        if self.play_button.rect.collidepoint(mouse_pos):
+            self.game_active = True
 
 if __name__ == '__main__':
     ai = AlienInvasion()
