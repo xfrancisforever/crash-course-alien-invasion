@@ -6,7 +6,6 @@ from game_stats import GameStats
 from button import Button
 import pygame
 import sys
-from time import sleep
 
 class AlienInvasion:
     """Overall class to manage game assets and behaviour."""
@@ -90,6 +89,8 @@ class AlienInvasion:
             self._fire_bullet()
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_p:
+            self._start_game()
 
     def _check_keyup_events(self, event):
         """Respond to key releases."""
@@ -128,6 +129,9 @@ class AlienInvasion:
         if not self.aliens:
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
+
+            pygame.time.delay(1000)
 
     def _lose_life(self):
         """Respond to the ship being hit by an alien."""
@@ -141,7 +145,7 @@ class AlienInvasion:
             self._create_fleet()
             self.ship.center_ship()
 
-            sleep(0.5)
+            pygame.time.delay(1000)
         else:
             self.game_active = False
 
@@ -210,8 +214,24 @@ class AlienInvasion:
     def _check_play_button(self, mouse_pos):
         """Start a new game when the player clicks Play."""
 
-        if self.play_button.rect.collidepoint(mouse_pos):
-            self.game_active = True
+        pressed = self.play_button.rect.collidepoint(mouse_pos)
+        if pressed and not self.game_active:
+            self._start_game()
+        else:
+            self.game_active = False
+            pygame.mouse.set_visible(True)
+
+    def _start_game(self):
+        self.game_active = True
+        self.stats.reset_stats()
+
+        self.bullets.empty()
+        self.aliens.empty()
+
+        self._create_fleet()
+        self.ship.center_ship()
+        
+        pygame.mouse.set_visible(False)
 
 if __name__ == '__main__':
     ai = AlienInvasion()
