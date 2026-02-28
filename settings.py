@@ -18,20 +18,36 @@ class Settings:
         # Alien settings
         self.fleet_drop_speed = 10
         self.alien_size = (40, 39)
+        self.fleet_direction = 1
 
+        # Button settings
+        self.button_size = (200, 50)
+
+        # Speed
         self.speedup_scale = 1.15
         self.bullet_cooldown_drop = 20
 
-        self.initialise_dynamic_settings()
-
-    def initialise_dynamic_settings(self):
+    def set_difficulty(self, difficulty):
         """Initialise settings that change throughout the game."""
-        self.ship_speed = 1.8
-        self.bullet_speed = 2.0
-        self.alien_speed = 1.0
-        self.bullet_cooldown = 500
 
-        self.fleet_direction = 1
+        match difficulty:
+            case 'easy':
+                self.ship_speed = 2.5
+                self.bullet_speed = 2.5
+                self.alien_speed = 0.7
+                self.bullet_cooldown = 300
+
+            case 'normal':
+                self.ship_speed = 1.8
+                self.bullet_speed = 2.5
+                self.alien_speed = 0.7
+                self.bullet_cooldown = 500
+
+            case 'hard':
+                self.ship_speed = 1.3
+                self.bullet_speed = 1.5
+                self.alien_speed = 1.5
+                self.bullet_cooldown = 700
 
     def increase_speed(self):
         """Increase speed settings."""

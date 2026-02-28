@@ -16,6 +16,7 @@ class AlienInvasion:
 
         self.bullet_cooldown_count = -1
         self.game_active = False
+        self.difficulty_selected = False
 
         self.settings = Settings()
 
@@ -31,9 +32,12 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stats = GameStats(self)
-        self.play_button = Button(self, "Play")
+
+        self.play_button = Button(self, self.settings.button_size, 
+            self.screen.get_rect().center, "Play")
 
         self._create_fleet()
+        self._create_difficulty_buttons()
 
         pygame.display.set_caption("Alien Invasion")
         
@@ -51,18 +55,6 @@ class AlienInvasion:
             self._update_screen()
             self.fps_clock.tick(60)
 
-    def _check_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                self._check_play_button(mouse_pos)
-            elif event.type == pygame.KEYDOWN:
-                self._check_keydown_events(event)
-            elif event.type == pygame.KEYUP:
-                self._check_keyup_events(event)
-
     def _update_screen(self):
         """Repopulate the screen with updated elements."""
 
@@ -73,10 +65,24 @@ class AlienInvasion:
         for b in self.bullets.sprites():
             b.draw_bullet()
 
-        if not self.game_active:
+        if not self.difficulty_selected and not self.game_active:
+            [b.draw_button() for b in self.difficulty_buttons.values()]
+        elif not self.game_active:
             self.play_button.draw_button()
         
         pygame.display.flip()
+
+    def _check_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_buttons(mouse_pos)
+            elif event.type == pygame.KEYDOWN:
+                self._check_keydown_events(event)
+            elif event.type == pygame.KEYUP:
+                self._check_keyup_events(event)
 
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
@@ -89,7 +95,8 @@ class AlienInvasion:
             self._fire_bullet()
         elif event.key == pygame.K_q:
             sys.exit()
-        elif event.key == pygame.K_p:
+        elif event.key == pygame.K_p and self.difficulty_selected and \
+                not self.game_active:
             self._start_game()
 
     def _check_keyup_events(self, event):
@@ -148,6 +155,7 @@ class AlienInvasion:
             pygame.time.delay(1000)
         else:
             self.game_active = False
+            self.difficulty_selected = False
 
     def _check_aliens_bottom(self):
         """Check if any aliens have reached the bottom of the screen."""
@@ -211,15 +219,43 @@ class AlienInvasion:
                 self._change_fleet_direction()
                 break
 
-    def _check_play_button(self, mouse_pos):
+    def _check_buttons(self, mouse_pos):
         """Start a new game when the player clicks Play."""
+        
+        if not self.difficulty_selected:
+            for key in self.difficulty_buttons.keys():
+                difficulty_pressed = self.difficulty_buttons[key] \
+                    .rect.collidepoint(mouse_pos)
 
-        pressed = self.play_button.rect.collidepoint(mouse_pos)
-        if pressed and not self.game_active:
-            self._start_game()
+                if difficulty_pressed:
+                    self.settings.set_difficulty(key)
+                    self.difficulty_selected = True
+
+        elif not self.game_active:
+            play_pressed = self.play_button.rect.collidepoint(mouse_pos)
+
+            if play_pressed:
+                self._start_game()
         else:
-            self.game_active = False
             pygame.mouse.set_visible(True)
+
+    def _create_difficulty_buttons(self):
+        screen_center = self.screen.get_rect().center
+        space_between = self.settings.button_size[0] + \
+            (self.settings.button_size[0] / 4)
+            
+        self.difficulty_buttons = {
+            'easy': Button(self, self.settings.button_size, 
+                        (screen_center[0] - space_between, 
+                         screen_center[1]), 'Easy'),
+
+            'normal': Button(self, self.settings.button_size,
+                        (screen_center[0], screen_center[1]),
+                        'Normal'),
+            'hard': Button(self, self.settings.button_size,
+                        (screen_center[0] + space_between,
+                         screen_center[1]), 'Hard')
+        }
 
     def _start_game(self):
         self.game_active = True
