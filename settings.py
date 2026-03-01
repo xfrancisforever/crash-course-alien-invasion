@@ -39,15 +39,15 @@ class Settings:
 
             case 'normal':
                 self.ship_speed = 1.8
-                self.bullet_speed = 2.5
-                self.alien_speed = 0.7
+                self.bullet_speed = 2.0
+                self.alien_speed = 1.0
                 self.bullet_cooldown = 500
 
             case 'hard':
                 self.ship_speed = 1.3
                 self.bullet_speed = 1.5
-                self.alien_speed = 1.5
-                self.bullet_cooldown = 700
+                self.alien_speed = 1.3
+                self.bullet_cooldown = 600
 
     def increase_speed(self):
         """Increase speed settings."""
