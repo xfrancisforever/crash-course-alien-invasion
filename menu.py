@@ -9,6 +9,7 @@ class Menu:
         self.game = game
         self.settings = game.settings
         self.screen = game.screen
+        self.screen_rect = self.screen.get_rect()
 
         self._create_play_button()
         self._create_difficulty_buttons()
@@ -19,14 +20,14 @@ class Menu:
         self.play_button = Button(
             self, 
             self.settings.button_size, 
-            self.screen.get_rect().center, 
+            self.screen_rect.center, 
             "Play"
         )
 
     def _create_difficulty_buttons(self):
         """Creates the difficulty button objects."""
 
-        screen_center = self.screen.get_rect().center
+        screen_center = self.screen_rect.center
         space_between = self.settings.button_size[0] * 1.25
             
         self.difficulty_buttons = {
@@ -64,3 +65,4 @@ class Menu:
     def check_play_button(self, mouse_pos):
         collided = self.play_button.rect.collidepoint(mouse_pos)
         return collided
+

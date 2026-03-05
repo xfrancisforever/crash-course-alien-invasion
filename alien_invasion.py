@@ -7,6 +7,7 @@ from fleet_manager import FleetManager
 from settings import Settings
 from game_stats import GameStats
 from menu import Menu
+from scoreboard import Scoreboard
 
 class AlienInvasion:
     """Overall class to manage game assets and behaviour."""
@@ -21,10 +22,8 @@ class AlienInvasion:
         self.difficulty_selected = False
 
         # Screen
-        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-        self.screen = pygame.display.set_mode(
-                (1200, 800), pygame.SHOWN)
         # Settings
         self.settings = Settings()
         self.settings.screen_width = self.screen.get_rect().width
@@ -35,6 +34,7 @@ class AlienInvasion:
         self.fleet = FleetManager(self)
         self.menu = Menu(self)
         self.stats = GameStats(self)
+        self.scoreboard = Scoreboard(self)
 
         # Sprite groups
         self.bullets = pygame.sprite.Group()
@@ -64,6 +64,7 @@ class AlienInvasion:
         self.screen.fill(self.settings.bg_colour)
         self.ship.blitme()
         self.fleet.draw()
+        self.scoreboard.draw()
         
         for b in self.bullets.sprites():
             b.draw_bullet()
@@ -135,6 +136,9 @@ class AlienInvasion:
 
         self.game_active = True
         self.stats.reset_stats()
+
+        self.scoreboard.prep_score()
+        self.scoreboard.prep_level()
         
         self.bullets.empty()
         self.fleet.empty()
@@ -174,10 +178,21 @@ class AlienInvasion:
             self.bullets, self.fleet.aliens, True, True
         )
 
+        if collisions:
+            for alien in collisions.values():
+                self.stats.score += (self.settings.alien_points * \
+                    len(alien))
+
+            self.scoreboard.prep_score()
+            self.scoreboard.check_high_score()
+
         if not self.fleet.aliens:
             self.bullets.empty()
             self.fleet.create_fleet()
             self.settings.increase_speed()
+
+            self.stats.level += 1
+            self.scoreboard.prep_level()
 
             pygame.time.delay(1000)
 
