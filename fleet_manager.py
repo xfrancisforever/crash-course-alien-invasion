@@ -37,15 +37,6 @@ class FleetManager:
 
         self.aliens.add(alien)
 
-    def check_bottom_reached(self):
-        """Check if any aliens have reached the bottom."""
-
-        for alien in self.aliens.sprites():
-            if alien.rect.bottom > self.settings.screen_height:
-                return True
-
-        return False
-
     def update(self):
         """Update alien positions."""
         self._check_fleet_edges()

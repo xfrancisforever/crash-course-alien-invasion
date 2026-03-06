@@ -1,9 +1,14 @@
+# TODO 1: Change the update screen function
+# TODO 2: Power-ups
+
 import pygame
 import sys
 from ship import Ship
 from alien import Alien
 from bullet import Bullet
 from fleet_manager import FleetManager
+from bullets_manager import BulletsManager
+from collision_manager import CollisionManager
 from settings import Settings
 from game_stats import GameStats
 from menu import Menu
@@ -16,10 +21,12 @@ class AlienInvasion:
         """Initialise the game, and create game resources."""
         pygame.init()
 
-        # Game stats
-        self.bullet_cooldown_count = -1
+        # Game status
         self.game_active = False
         self.difficulty_selected = False
+
+        # Clocks
+        self.fps_clock = pygame.time.Clock()
 
         # Screen
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -35,46 +42,55 @@ class AlienInvasion:
         self.menu = Menu(self)
         self.stats = GameStats(self)
         self.scoreboard = Scoreboard(self)
+        self.bullets_manager = BulletsManager(self)
+        self.collisions = CollisionManager(self)
 
-        # Sprite groups
-        self.bullets = pygame.sprite.Group()
-
-        # Clocks
-        self.fps_clock = pygame.time.Clock()
-        self.bullet_clock = pygame.time.Clock()
-        self.fleet.create_fleet()
         pygame.display.set_caption("Alien Invasion")
 
     def run_game(self):
         """Start the main loop for the game."""
         while True:
             self._check_events()
-
-            if self.game_active:
-                self.ship.update()
-                self._update_fleet()
-                self._update_bullets()
-
             self._update_screen()
             self.fps_clock.tick(60)
+
+    def start_game(self):
+        """Start a new game."""
+
+        self.game_active = True
+
+        self.stats.reset_stats()
+        self._reposition_elements()        
+
+        self.scoreboard.prep_score()
+        self.scoreboard.prep_level()
+        self.scoreboard.prep_ships()
+        
+        pygame.mouse.set_visible(False)
+
+    def lose_life(self):
+        """Respond to the ship being hit by an alien."""
+        
+        if self.stats.ships_left > 0:
+            self.stats.ships_left -= 1
+            self._reposition_elements()
+        else:
+            self.game_active = False
+            self.difficulty_selected = False
+        
+        self.scoreboard.prep_ships()
+        pygame.time.delay(1000)
 
     def _update_screen(self):
         """Repopulate the screen with updated elements."""
 
         self.screen.fill(self.settings.bg_colour)
-        self.ship.blitme()
-        self.fleet.draw()
-        self.scoreboard.draw()
         
-        for b in self.bullets.sprites():
-            b.draw_bullet()
+        self._draw_menu()
+        self.scoreboard.draw()
 
-        if not self.difficulty_selected:
-            self.menu.draw_difficulty_menu()
-        elif not self.game_active:
-            self.menu.draw_play_button()
-        else:
-            pygame.mouse.set_visible(True)
+        if self.game_active:
+            self._refresh_elements()
 
         pygame.display.flip()
 
@@ -99,12 +115,9 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
-            self._fire_bullet()
+            self.bullets_manager.fire()
         elif event.key == pygame.K_q:
             sys.exit()
-        elif event.key == pygame.K_p and self.difficulty_selected and \
-                not self.game_active:
-            self._start_game()
 
     def _check_keyup_events(self, event):
         """Respond to key releases."""
@@ -120,112 +133,55 @@ class AlienInvasion:
         mouse_pos = pygame.mouse.get_pos()
 
         if not self.difficulty_selected:
-            difficulty = self.menu.check_difficulty_buttons(mouse_pos)
-
-            if difficulty:
-                self.settings.set_difficulty(difficulty)
-                self.difficulty_selected = True
-
+            self.menu.check_difficulty_buttons(mouse_pos)
         elif not self.game_active:
-            pressed = self.menu.check_play_button(mouse_pos)
-            if pressed:
-                self._start_game()
+            self.menu.check_play_button(mouse_pos)
 
-    def _start_game(self):
-        """Start a new game."""
+    def _draw_menu(self):
+        if not self.difficulty_selected:
+            self.menu.draw_difficulty_menu()
+        elif not self.game_active:
+            self.menu.draw_play_button()
+        else:
+            pygame.mouse.set_visible(True)
 
-        self.game_active = True
-        self.stats.reset_stats()
+    def _refresh_elements(self):
+        """Updates the gameplay elements of the game."""
 
-        self.scoreboard.prep_score()
-        self.scoreboard.prep_level()
-        
-        self.bullets.empty()
+        self.ship.update()
+        self.fleet.update()
+        self.collisions.check_alien_collision()
+
+        self.bullets_manager.update()
+        self.collisions.check_bullet_alien_collisions()
+
+        self.ship.draw()
+        self.fleet.draw()
+        self.bullets_manager.draw()
+
+        if not self.fleet.aliens:
+            self._new_level()
+
+
+    def _reposition_elements(self):
+        """Repositions elements for a new round."""
+
+        self.bullets_manager.empty()
         self.fleet.empty()
 
         self.fleet.create_fleet()
         self.ship.center_ship()
-        
-        pygame.mouse.set_visible(False)
 
-    def _fire_bullet(self):
-        """Create a new bullet and add it to the bullets group."""
+    def _new_level(self):
+        self.bullets_manager.empty()
+        self.fleet.create_fleet()
+        self.settings.increase_speed()
 
-        new_tick = self.bullet_clock.tick()
+        self.stats.level += 1
+        self.scoreboard.prep_level()
 
-        if new_tick + self.bullet_cooldown_count >= \
-                self.settings.bullet_cooldown or \
-                self.bullet_cooldown_count == -1: 
-            self.bullets.add(Bullet(self))
-            self.bullet_cooldown_count = 0
-        else:
-            self.bullet_cooldown_count += new_tick
+        pygame.time.delay(1000)
 
-    def _update_bullets(self):
-        """Update bullet positions and check for collisions."""
-
-        self.bullets.update()
-        self._check_bullet_alien_collisions()
-
-        for bullet in self.bullets.copy():
-            if bullet.rect.bottom <= 0:
-                self.bullets.remove(bullet)
-
-    def _check_bullet_alien_collisions(self):
-        """Respond to bullet-alien collisions."""
-
-        collisions = pygame.sprite.groupcollide(
-            self.bullets, self.fleet.aliens, True, True
-        )
-
-        if collisions:
-            for alien in collisions.values():
-                self.stats.score += (self.settings.alien_points * \
-                    len(alien))
-
-            self.scoreboard.prep_score()
-            self.scoreboard.check_high_score()
-
-        if not self.fleet.aliens:
-            self.bullets.empty()
-            self.fleet.create_fleet()
-            self.settings.increase_speed()
-
-            self.stats.level += 1
-            self.scoreboard.prep_level()
-
-            pygame.time.delay(1000)
-
-    def _update_fleet(self):
-        """Updates the fleet and checks if it killed the player."""
-
-        self.fleet.update()
-
-        bottom_reached = self.fleet.check_bottom_reached()
-        ship_hit = pygame.sprite.spritecollideany(
-                self.ship, self.fleet.aliens
-        )
-
-        if bottom_reached or ship_hit:
-            self._lose_life()
-
-
-    def _lose_life(self):
-        """Respond to the ship being hit by an alien."""
-
-        if self.stats.ships_left > 0:
-            self.stats.ships_left -= 1
-
-            self.bullets.empty()
-            self.fleet.empty()
-
-            self.fleet.create_fleet()
-            self.ship.center_ship()
-
-            pygame.time.delay(1000)
-        else:
-            self.game_active = False
-            self.difficulty_selected = False
 
 if __name__ == '__main__':
     ai = AlienInvasion()

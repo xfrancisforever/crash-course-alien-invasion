@@ -1,8 +1,10 @@
 import pygame
 
 class Settings:
+    """Class to store all settings from the Alien Invasion game."""
+
     def __init__(self):
-        """Class to store all settings from the Alien Invasion game."""
+        """Initialise settings attributes."""
 
         # Screen settings
         self.screen_width = 1200
@@ -26,7 +28,6 @@ class Settings:
         self.fleet_drop_speed = 10
         self.alien_size = (40, 39)
         self.fleet_direction = 1
-        self.alien_points = 10
 
         # Button settings
         self.button_size = (200, 50)
@@ -57,6 +58,8 @@ class Settings:
                 self.bullet_speed = 1.8
                 self.alien_speed = 1.5
                 self.bullet_cooldown = 500
+
+        self.alien_points = 10
 
     def increase_speed(self):
         """Increase speed settings."""

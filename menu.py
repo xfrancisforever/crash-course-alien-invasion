@@ -4,7 +4,7 @@ class Menu:
     """Manage game menus and UI"""
 
     def __init__(self, game):
-        """Initialised the game menu."""
+        """Initialise the game menu."""
 
         self.game = game
         self.settings = game.settings
@@ -58,11 +58,17 @@ class Menu:
             collided = button.rect.collidepoint(mouse_pos)
 
             if collided:
-                return difficulty
+                self.settings.set_difficulty(difficulty)
+                self.game.difficulty_selected = True
+                return
 
         return None
 
     def check_play_button(self, mouse_pos):
         collided = self.play_button.rect.collidepoint(mouse_pos)
-        return collided
+
+        if collided:
+            self.game.start_game()
+        else:
+            return None
 
