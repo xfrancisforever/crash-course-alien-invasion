@@ -5,6 +5,7 @@ import pygame
 import sys
 from ship import Ship
 from alien import Alien
+from powerup import Powerup
 from bullet import Bullet
 from fleet_manager import FleetManager
 from bullets_manager import BulletsManager
@@ -39,6 +40,7 @@ class AlienInvasion:
         # Related classes
         self.ship = Ship(self) 
         self.fleet = FleetManager(self)
+        self.powerup = Powerup(self)
         self.menu = Menu(self)
         self.stats = GameStats(self)
         self.scoreboard = Scoreboard(self)
@@ -151,6 +153,7 @@ class AlienInvasion:
         self.ship.update()
         self.fleet.update()
         self.collisions.check_alien_collision()
+        self.powerup.update()
 
         self.bullets_manager.update()
         self.collisions.check_bullet_alien_collisions()
@@ -158,6 +161,7 @@ class AlienInvasion:
         self.ship.draw()
         self.fleet.draw()
         self.bullets_manager.draw()
+        self.powerup.draw()
 
         if not self.fleet.aliens:
             self._new_level()
