@@ -1,20 +1,23 @@
-import pygame
+import pygame as pg
 from pygame.sprite import Sprite
 
 class Bullet(Sprite):
-    def __init__(self, ai_game):
+    Speed = 2.0
+    Cooldown = 500
+    Width = 5
+    Height = 15
+    Colour = (60, 60, 60)
+
+    def __init__(self, game, initial_midtop=None):
         """Create a bullet object at the ship's current position."""
 
         super().__init__()
         
-        self.screen = ai_game.screen
-        self.settings = ai_game.settings
+        self.screen = game.screen
+        self.settings = game.settings
 
-        self.colour = self.settings.bullet_colour
-
-        self.rect = pygame.Rect(0, 0, self.settings.bullet_width,
-            self.settings.bullet_height)
-        self.rect.midtop = ai_game.ship.rect.midtop
+        self.rect = pg.Rect(0, 0, Bullet.Width, Bullet.Height)
+        self.rect.midtop = initial_midtop or game.ship.rect.midtop
 
         self.y = float(self.rect.y)
 
@@ -22,9 +25,16 @@ class Bullet(Sprite):
     def update(self):
         """Move the bullet up the screen."""
 
-        self.y -= self.settings.bullet_speed
+        self.y -= Bullet.Speed
         self.rect.y = self.y
 
     def draw_bullet(self):
         """Draw the bullet to the screen."""
-        pygame.draw.rect(self.screen, self.colour, self.rect)
+        pg.draw.rect(self.screen, Bullet.Colour, self.rect)
+
+    @staticmethod
+    def increase_speed():
+        Bullet.Speed *= 1.5
+
+        if Bullet.Cooldown >= 100:
+            Bullet.Cooldown -= 25

@@ -4,6 +4,9 @@ from pygame.sprite import Sprite
 class Ship(Sprite):
     """A class to manage the ship."""
 
+    Speed = 1.5
+    Image = pygame.image.load('images/ship.bmp')
+
     def __init__(self, ai_game):
         """Initialise the ship and set its starting position."""
         super().__init__()
@@ -14,8 +17,7 @@ class Ship(Sprite):
         self.screen_rect = ai_game.screen.get_rect()
 
         # Image
-        self.image = pygame.image.load('images/ship.bmp')
-        self.rect = self.image.get_rect()
+        self.rect = Ship.Image.get_rect()
 
         self.rect.midbottom = self.screen_rect.midbottom
 
@@ -25,14 +27,14 @@ class Ship(Sprite):
 
     def draw(self):
         """Draw the ship at its current location."""
-        self.screen.blit(self.image, self.rect)
+        self.screen.blit(Ship.Image, self.rect)
 
     def update(self):
         """Update the ship's position based on the movement flag."""
         if self.moving_right and self.rect.right < self.screen_rect.right:
-            self.x += self.settings.ship_speed
+            self.x += Ship.Speed
         if self.moving_left and self.rect.left > 0:
-            self.x -= self.settings.ship_speed
+            self.x -= Ship.Speed
 
         self.rect.x = self.x
         
@@ -41,3 +43,7 @@ class Ship(Sprite):
 
         self.rect.midbottom = self.screen_rect.midbottom
         self.x = float(self.rect.x)
+
+    @staticmethod
+    def increase_speed():
+        Ship.Speed *= 1.5

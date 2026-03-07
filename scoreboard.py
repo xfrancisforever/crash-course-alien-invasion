@@ -1,8 +1,14 @@
-import pygame
+import pygame as pg
 from ship import Ship
+
+SCREEN_GAP = 20
+PADDING = 10
 
 class Scoreboard:
     """Class to display the player stats while the game is running."""
+
+    TextColour = (30, 30, 30)
+    Font = pg.font.SysFont(None, 48)
 
     def __init__(self, game):
         """Initialise scoreboard attributes."""
@@ -23,17 +29,16 @@ class Scoreboard:
             
         rounded_score = round(self.stats.score, -1)
         score_str = f'{rounded_score:,}'
-        self.score_image = self.settings.score_font.render(
+        self.score_image = Scoreboard.Font.render(
             score_str,
             True,
-            self.settings.score_text_colour,
+            Scoreboard.TextColour,
             self.settings.bg_colour
         )
 
         self.score_rect = self.score_image.get_rect()
-        self.score_rect.right = self.screen_rect.right - \
-            self.settings.score_gap
-        self.score_rect.top = self.settings.score_gap
+        self.score_rect.right = self.screen_rect.right - SCREEN_GAP
+        self.score_rect.top = SCREEN_GAP
 
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
@@ -41,45 +46,44 @@ class Scoreboard:
         high_score = round(self.stats.high_score, -1)
         high_score_str = f'{high_score:,}'
 
-        self.high_score_image = self.settings.score_font.render(
+        self.high_score_image = Scoreboard.Font.render(
             high_score_str,
             True,
-            self.settings.score_text_colour,
+            Scoreboard.TextColour,
             self.settings.bg_colour
         )
 
         self.high_score_rect = self.high_score_image.get_rect()
         self.high_score_rect.centerx = self.screen_rect.centerx
-        self.high_score_rect.top = self.settings.score_gap
+        self.high_score_rect.top = SCREEN_GAP 
 
     def prep_level(self):
         """Turn the level into a rendered image."""
 
         level_str = str(self.stats.level)
-        self.level_image = self.settings.score_font.render(
+        self.level_image = Scoreboard.Font.render(
             level_str,
             True,
-            self.settings.score_text_colour,
+            Scoreboard.TextColour,
             self.settings.bg_colour
         )
 
         self.level_rect = self.level_image.get_rect()
-        self.level_rect.right = self.screen_rect.right - \
-            self.settings.score_gap
+        self.level_rect.right = self.screen_rect.right - SCREEN_GAP
         self.level_rect.top = self.score_rect.bottom + \
-            self.settings.score_gap
+                PADDING
 
     def prep_ships(self):
         """Show how many ships are left."""
 
-        self.ships = pygame.sprite.Group()
-        
-        for ship_num in range(self.stats.ships_left):
-            ship = Ship(self.game)
-            ship.rect.x = 10 + (ship_num * ship.rect.width)
-            ship.rect.y = 10
+        self.ships = []
 
-            self.ships.add(ship)
+        for n in range(self.stats.ships_left):
+            rect = Ship.Image.get_rect()
+            rect.x = PADDING + (n * rect.width)
+            rect.y = SCREEN_GAP
+            
+            self.ships.append(rect)
 
     def draw(self):
         """Draw stats to the screen."""
@@ -87,7 +91,9 @@ class Scoreboard:
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)
-        self.ships.draw(self.screen)
+
+        for ship in self.ships:
+            self.screen.blit(Ship.Image, ship)
 
     def check_high_score(self):
         """Check to see if there's a new high score."""

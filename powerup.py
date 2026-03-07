@@ -5,6 +5,9 @@ from pygame.sprite import Sprite
 class Powerup(Sprite):
     """Class to represent a powerup for Alien Invasion."""
 
+    Cooldown = 10000
+    Limit = 15
+
     def __init__(self, game):
         """Initialise the attributes of a powerup."""
 
@@ -13,10 +16,11 @@ class Powerup(Sprite):
         self.screen = game.screen
         self.screen_rect = game.screen.get_rect()
 
+        self.y = 0
         self.sprite_count = 0
 
         self._load_images() 
-        self.load_rect()
+        self.reset_rect()
 
     def draw(self):
         current_sprite = self.images[self.sprite_count // 6]
@@ -27,13 +31,13 @@ class Powerup(Sprite):
         else:
             self.sprite_count = 0
 
-    def load_rect(self):
-        print(self.screen_rect.x - 10)
+    def update(self):
+        self.y = float(self.y + 1.5)
+        self.rect.y = self.y
+            
+    def reset_rect(self):
         self.x = random.randint(10, self.screen_rect.right - 10)
         self.rect = pg.Rect((self.x, 0), (20, 20))
-
-    def update(self):
-        self.rect.y += 1
 
     def _load_images(self):
         self.images = []

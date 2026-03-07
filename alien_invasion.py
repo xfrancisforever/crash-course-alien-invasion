@@ -1,4 +1,3 @@
-# TODO 1: Change the update screen function
 # TODO 2: Power-ups
 
 import pygame
@@ -9,6 +8,7 @@ from powerup import Powerup
 from bullet import Bullet
 from fleet_manager import FleetManager
 from bullets_manager import BulletsManager
+from powerup_manager import PowerupManager
 from collision_manager import CollisionManager
 from settings import Settings
 from game_stats import GameStats
@@ -26,6 +26,8 @@ class AlienInvasion:
         self.game_active = False
         self.difficulty_selected = False
 
+        self.stats = GameStats(self)
+
         # Clocks
         self.fps_clock = pygame.time.Clock()
 
@@ -39,15 +41,18 @@ class AlienInvasion:
 
         # Related classes
         self.ship = Ship(self) 
-        self.fleet = FleetManager(self)
-        self.powerup = Powerup(self)
         self.menu = Menu(self)
-        self.stats = GameStats(self)
         self.scoreboard = Scoreboard(self)
-        self.bullets_manager = BulletsManager(self)
+
+        self.fleet = FleetManager(self)
+        self.powerup_manager = PowerupManager(self)
+        self.bullets_manager = BulletsManager(self, self.powerup_manager)
         self.collisions = CollisionManager(self)
 
         pygame.display.set_caption("Alien Invasion")
+
+        self.fleet.create_fleet()
+        self.ship.center_ship()
 
     def run_game(self):
         """Start the main loop for the game."""
@@ -87,12 +92,15 @@ class AlienInvasion:
         """Repopulate the screen with updated elements."""
 
         self.screen.fill(self.settings.bg_colour)
+
+        if self.game_active:
+            self._update_gameplay_elements()
+
+        self._draw_initial_elements()
+
         
         self._draw_menu()
         self.scoreboard.draw()
-
-        if self.game_active:
-            self._refresh_elements()
 
         pygame.display.flip()
 
@@ -117,7 +125,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
-            self.bullets_manager.fire()
+            self.bullets_manager.trigger()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -147,25 +155,33 @@ class AlienInvasion:
         else:
             pygame.mouse.set_visible(True)
 
-    def _refresh_elements(self):
+    def _update_gameplay_elements(self):
         """Updates the gameplay elements of the game."""
-
         self.ship.update()
         self.fleet.update()
-        self.collisions.check_alien_collision()
-        self.powerup.update()
-
         self.bullets_manager.update()
-        self.collisions.check_bullet_alien_collisions()
 
-        self.ship.draw()
-        self.fleet.draw()
-        self.bullets_manager.draw()
-        self.powerup.draw()
+        self.collisions.check_alien_collision()
+        self.fleet.check_bottom_reached()
+        self.collisions.check_bullet_collision()
+
+        self._execute_powerup_actions()
 
         if not self.fleet.aliens:
             self._new_level()
 
+    def _draw_initial_elements(self):
+        self.ship.draw()
+        self.fleet.draw()
+        self.bullets_manager.draw()
+
+    def _execute_powerup_actions(self):
+        self.powerup_manager.generate_powerup() 
+
+        if self.powerup_manager.on_screen:
+            self.powerup_manager.update()
+            self.powerup_manager.draw()
+            self.collisions.check_powerup_collision()
 
     def _reposition_elements(self):
         """Repositions elements for a new round."""
@@ -177,11 +193,16 @@ class AlienInvasion:
         self.ship.center_ship()
 
     def _new_level(self):
+        self.stats.level += 1
+
         self.bullets_manager.empty()
         self.fleet.create_fleet()
-        self.settings.increase_speed()
+        self.powerup_manager.turn_off()
 
-        self.stats.level += 1
+        Ship.increase_speed()
+        Alien.increase_difficulty()
+        Bullet.increase_speed()
+
         self.scoreboard.prep_level()
 
         pygame.time.delay(1000)

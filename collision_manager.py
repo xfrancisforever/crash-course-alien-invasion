@@ -1,46 +1,47 @@
 import pygame as pg
+from alien import Alien
 
 class CollisionManager:
-    """Class to manage collisions in the Alien Invasion game."""
+    """Class to manage every collision in the game."""
 
     def __init__(self, game):
-        """Initialise attributes of the manager."""
+        """Initialises all attributes of the class."""
 
         self.game = game
-        self.screen = game.screen
-        self.settings = game.settings
         self.stats = game.stats
         self.scoreboard = game.scoreboard
 
-        self.bullets = game.bullets_manager.bullets
         self.aliens = game.fleet.aliens
         self.ship = game.ship
+        self.bullets_manager = game.bullets_manager
+        self.powerup_manager = game.powerup_manager
 
-    def check_bullet_alien_collisions(self):
-        """Respond to bullet-alien collisions."""
+    def check_bullet_collision(self):
+        """Checks if a bullet collided with an alien."""
 
         collisions = pg.sprite.groupcollide(
-            self.bullets, self.aliens, True, True
+            self.bullets_manager.bullets, self.aliens, True, True
         )
 
         if collisions:
-            for alien in collisions.values():
-                self.stats.score += (self.settings.alien_points * \
-                    len(alien))
+            for aliens in collisions.values():
+                self.stats.score += len(aliens) * Alien.Points
 
             self.scoreboard.prep_score()
             self.scoreboard.check_high_score()
 
     def check_alien_collision(self):
-        """Check if any aliens have reached the bottom."""
+        """Checks if an alien has hit the ship."""
 
         ship_hit = pg.sprite.spritecollideany(self.ship, self.aliens)
-        if ship_hit or self.alien_reached_bottom():
+        if ship_hit: 
             self.game.lose_life()
 
-    def alien_reached_bottom(self):
-        for alien in self.aliens.sprites():
-            if alien.rect.bottom > self.settings.screen_height:
-                return True
-
-        return False
+    def check_powerup_collision(self):
+        collided = pg.sprite.collide_rect(
+            self.ship, self.powerup_manager.powerup
+        )
+                 
+        if collided:
+            self.powerup_manager.active = True
+            self.powerup_manager.on_screen = False

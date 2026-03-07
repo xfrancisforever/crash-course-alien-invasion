@@ -58,7 +58,6 @@ class Menu:
             collided = button.rect.collidepoint(mouse_pos)
 
             if collided:
-                self.settings.set_difficulty(difficulty)
                 self.game.difficulty_selected = True
                 return
 
