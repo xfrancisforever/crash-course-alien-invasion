@@ -16,7 +16,7 @@ class PowerupManager:
     def generate_powerup(self, dt):
         """Randomly draws the powerup if the cooldown is over."""
 
-        if self.powerups
+        if self.powerups:
             return
 
         if (self.cooldown + dt) > Powerup.Cooldown:
@@ -25,6 +25,14 @@ class PowerupManager:
                 self.cooldown = 0
         else:
             self.cooldown += dt
+
+    def get_active_powerups(self):
+        """Returns all active powerups."""
+        active_powerups = []
+        for powerup in self.powerups:
+            active_powerups.append(powerup)
+
+        return active_powerups
     
     def update(self):
         """Updates the powerup and clears it if not caught."""
@@ -36,6 +44,5 @@ class PowerupManager:
                 self.cooldown = 0
 
     def draw(self):
-        """Draws the powerup on the screen."""
         self.powerups.draw()
 

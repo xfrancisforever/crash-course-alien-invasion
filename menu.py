@@ -18,8 +18,8 @@ class Menu:
         """Creates the play button object."""
 
         self.play_button = Button(
-            self, 
-            Menu.ButtonSize
+            self.screen, 
+            Menu.ButtonSize,
             self.screen_rect.center, 
             "Play"
         )
@@ -28,24 +28,25 @@ class Menu:
         """Creates the difficulty button objects."""
 
         screen_center = self.screen_rect.center
-        space_between = Menu.ButtonSize * 1.25
+        space_between = Menu.ButtonSize[0] * 1.25
             
         self.difficulty_buttons = {
             'easy': Button(
-                self, Menu.ButtonSize, 
+                self.screen, 
+                Menu.ButtonSize, 
                 (screen_center[0] - space_between, 
                 screen_center[1]), 
                 'Easy'
             ),
             'normal': Button(
-                self, 
+                self.screen, 
                 Menu.ButtonSize,
                 (screen_center[0], 
                 screen_center[1]),
                 'Normal'
             ),
             'hard': Button(
-                self, 
+                self.screen, 
                 Menu.ButtonSize,
                 (screen_center[0] + space_between,
                 screen_center[1]), 

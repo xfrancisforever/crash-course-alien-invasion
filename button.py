@@ -1,20 +1,25 @@
 import pygame
-from buttonStyles import ButtonStyles
-
-pygame.init()
+from button_styles import ButtonStyles
 
 class Button:
     "A class to build buttons for the game."""
 
-    def __init__(self, screen, position, message, style=ButtonStyle()):
+    def __init__(
+            self, 
+            screen, 
+            screen_rect, 
+            position, 
+            message, 
+            styles=ButtonStyles()
+    ):
         """Initialise the button attributes."""
 
         self.screen = screen
-        self.screen_rect = self.screen.get_rect()
+        self.screen_rect = screen_rect
 
-        self.style = style
+        self.styles = styles
 
-        self.rect = pygame.Rect(0, 0, style.size[0], style.size[1])
+        self.rect = pygame.Rect(0, 0, styles.size[0], styles.size[1])
         self.rect.center = position
 
         self.message_image = None
@@ -27,11 +32,11 @@ class Button:
            button.
         """
 
-        self.message_image = self.font.render(
+        self.message_image = self.styles.font.render(
             message, 
             True, 
-            self.style.font_colour, 
-            self.style.colour
+            self.styles.font_colour, 
+            self.styles.colour
         )
 
         self.message_rect = self.message_image.get_rect()
@@ -40,5 +45,5 @@ class Button:
     def draw_button(self):
         """Draw a blank button and then draw message."""
 
-        self.screen.fill(self.style.colour, self.rect)
+        self.screen.fill(self.styles.colour, self.rect)
         self.screen.blit(self.message_image, self.message_rect)

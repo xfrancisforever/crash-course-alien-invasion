@@ -27,7 +27,7 @@ class Bullet(Sprite):
         self.y -= Bullet.Speed
         self.rect.y = self.y
 
-    def draw_bullet(self):
+    def draw(self):
         """Draw the bullet to the screen."""
         pg.draw.rect(self.screen, Bullet.Colour, self.rect)
 

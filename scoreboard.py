@@ -10,12 +10,12 @@ class Scoreboard:
     TextColour = (30, 30, 30)
     Font = pg.font.SysFont(None, 48)
 
-    def __init__(self, screen, screen_rect, game_stats):
+    def __init__(self, screen, screen_rect, game_stats, bg_colour):
         """Initialise scoreboard attributes."""
 
         self.screen = screen
         self.screen_rect = screen_rect
-        self.bg_colour = screen.get_palette_at()
+        self.bg_colour = bg_colour
 
         self.game_stats = game_stats
 
@@ -36,7 +36,7 @@ class Scoreboard:
     def prep_score(self):
         """Turn the score into a rendered image."""
             
-        rounded_score = round(self.stats.score, -1)
+        rounded_score = round(self.game_stats.score, -1)
         score_str = f'{rounded_score:,}'
 
         self.score_image = Scoreboard.Font.render(
@@ -53,7 +53,7 @@ class Scoreboard:
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
 
-        high_score = round(self.stats.high_score, -1)
+        high_score = round(self.game_stats.high_score, -1)
         high_score_str = f'{high_score:,}'
 
         self.high_score_image = Scoreboard.Font.render(
@@ -70,7 +70,7 @@ class Scoreboard:
     def prep_level(self):
         """Turn the level into a rendered image."""
 
-        level_str = str(self.stats.level)
+        level_str = str(self.game_stats.level)
         self.level_image = Scoreboard.Font.render(
             level_str,
             True,
@@ -86,7 +86,7 @@ class Scoreboard:
     def prep_ships(self):
         """Show how many ships are left."""
 
-        for n in range(self.stats.ships_left):
+        for n in range(self.game_stats.ships_left):
             rect = Ship.Image.get_rect()
             rect.x = PADDING + (n * rect.width)
             rect.y = SCREEN_GAP
@@ -106,6 +106,6 @@ class Scoreboard:
     def check_high_score(self):
         """Check to see if there's a new high score."""
 
-        if self.stats.score > self.stats.high_score:
-            self.stats.high_score = self.stats.score
+        if self.game_stats.score > self.game_stats.high_score:
+            self.game_stats.high_score = self.game_stats.score
             self.prep_high_score()
