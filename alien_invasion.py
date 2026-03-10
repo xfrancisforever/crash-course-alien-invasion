@@ -1,5 +1,3 @@
-# TODO 2: Power-ups
-
 import pygame
 import sys
 from ship import Ship
@@ -7,8 +5,8 @@ from alien import Alien
 from powerup import Powerup
 from bullet import Bullet
 from fleet_manager import FleetManager
-from bullets_manager import BulletsManager
-from powerup_manager import PowerupManager
+from bullets import BulletsManager
+from powerups import PowerupManager
 from collision_manager import CollisionManager
 from settings import Settings
 from game_stats import GameStats
@@ -17,6 +15,8 @@ from scoreboard import Scoreboard
 
 class AlienInvasion:
     """Overall class to manage game assets and behaviour."""
+
+    BgColour = (230, 230, 230)
 
     def __init__(self):
         """Initialise the game, and create game resources."""
@@ -29,15 +29,11 @@ class AlienInvasion:
         self.stats = GameStats(self)
 
         # Clocks
-        self.fps_clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
 
         # Screen
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-
-        # Settings
-        self.settings = Settings()
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
+        self.screen_rect = self.screen.get_rect()
 
         # Related classes
         self.ship = Ship(self) 
@@ -45,8 +41,8 @@ class AlienInvasion:
         self.scoreboard = Scoreboard(self)
 
         self.fleet = FleetManager(self)
-        self.powerup_manager = PowerupManager(self)
-        self.bullets_manager = BulletsManager(self, self.powerup_manager)
+        self.powerups = PowerupManager(self)
+        self.bullets = BulletsManager(self, self.powerups)
         self.collisions = CollisionManager(self)
 
         pygame.display.set_caption("Alien Invasion")
@@ -57,9 +53,9 @@ class AlienInvasion:
     def run_game(self):
         """Start the main loop for the game."""
         while True:
+            dt = self.clock.tick(60)
             self._check_events()
-            self._update_screen()
-            self.fps_clock.tick(60)
+            self._update_screen(dt)
 
     def start_game(self):
         """Start a new game."""
@@ -88,17 +84,17 @@ class AlienInvasion:
         self.scoreboard.prep_ships()
         pygame.time.delay(1000)
 
-    def _update_screen(self):
+    def _update_screen(self, dt):
         """Repopulate the screen with updated elements."""
 
-        self.screen.fill(self.settings.bg_colour)
+        self.screen.fill(AlienInvasion.BgColour)
 
         if self.game_active:
             self._update_gameplay_elements()
 
         self._draw_initial_elements()
+        self._execute_powerup_actions()
 
-        
         self._draw_menu()
         self.scoreboard.draw()
 
@@ -125,7 +121,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
-            self.bullets_manager.trigger()
+            self.bullets.trigger()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -159,13 +155,11 @@ class AlienInvasion:
         """Updates the gameplay elements of the game."""
         self.ship.update()
         self.fleet.update()
-        self.bullets_manager.update()
+        self.bullets.update()
 
         self.collisions.check_alien_collision()
         self.fleet.check_bottom_reached()
         self.collisions.check_bullet_collision()
-
-        self._execute_powerup_actions()
 
         if not self.fleet.aliens:
             self._new_level()
@@ -173,20 +167,20 @@ class AlienInvasion:
     def _draw_initial_elements(self):
         self.ship.draw()
         self.fleet.draw()
-        self.bullets_manager.draw()
+        self.bullets.draw()
 
     def _execute_powerup_actions(self):
-        self.powerup_manager.generate_powerup() 
+        self.powerups.generate_powerup() 
 
-        if self.powerup_manager.on_screen:
-            self.powerup_manager.update()
-            self.powerup_manager.draw()
+        if self.powerups.on_screen:
+            self.powerups.update()
+            self.powerups.draw()
             self.collisions.check_powerup_collision()
 
     def _reposition_elements(self):
         """Repositions elements for a new round."""
 
-        self.bullets_manager.empty()
+        self.bullets.empty()
         self.fleet.empty()
 
         self.fleet.create_fleet()
@@ -195,9 +189,9 @@ class AlienInvasion:
     def _new_level(self):
         self.stats.level += 1
 
-        self.bullets_manager.empty()
+        self.bullets.empty()
         self.fleet.create_fleet()
-        self.powerup_manager.turn_off()
+        self.powerups.turn_off()
 
         Ship.increase_speed()
         Alien.increase_difficulty()

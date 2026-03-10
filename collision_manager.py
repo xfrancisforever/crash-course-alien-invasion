@@ -1,47 +1,26 @@
 import pygame as pg
+from functools import reduce
 from alien import Alien
 
 class CollisionManager:
     """Class to manage every collision in the game."""
 
-    def __init__(self, game):
-        """Initialises all attributes of the class."""
+    @staticmethod
+    def check_bullet_collision(bullets, aliens):
+        """Checks if any aliens were hit and how many."""
 
-        self.game = game
-        self.stats = game.stats
-        self.scoreboard = game.scoreboard
+        collisions = pg.sprite.groupcollide(bullets, aliens, True, True)
+        for aliens in collisions.value():
+            total_aliens + len(aliens)
 
-        self.aliens = game.fleet.aliens
-        self.ship = game.ship
-        self.bullets_manager = game.bullets_manager
-        self.powerup_manager = game.powerup_manager
+        return total_aliens
 
-    def check_bullet_collision(self):
-        """Checks if a bullet collided with an alien."""
-
-        collisions = pg.sprite.groupcollide(
-            self.bullets_manager.bullets, self.aliens, True, True
-        )
-
-        if collisions:
-            for aliens in collisions.values():
-                self.stats.score += len(aliens) * Alien.Points
-
-            self.scoreboard.prep_score()
-            self.scoreboard.check_high_score()
-
-    def check_alien_collision(self):
+    def check_alien_collision(ship, aliens):
         """Checks if an alien has hit the ship."""
+        ship_hit = pg.sprite.spritecollideany(ship, aliens)
+        return ship_hit
 
-        ship_hit = pg.sprite.spritecollideany(self.ship, self.aliens)
-        if ship_hit: 
-            self.game.lose_life()
-
-    def check_powerup_collision(self):
-        collided = pg.sprite.collide_rect(
-            self.ship, self.powerup_manager.powerup
-        )
-                 
-        if collided:
-            self.powerup_manager.active = True
-            self.powerup_manager.on_screen = False
+    def check_powerup_collision(self, ship, powerup):
+        """Checks if the powerup collided with the ship."""
+        collided = pg.sprite.collide_rect(ship, powerup)
+        return collided

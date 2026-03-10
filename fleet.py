@@ -1,42 +1,38 @@
 import pygame as pg
 from alien import Alien
 
-class FleetManager:
+class Fleet:
     """Manages the alien fleet."""
 
-    def __init__(self, game):
+    DropSpeed = 10
+    Direction = 1
+
+    def __init__(self, screen, screen_rect):
         """Initialises attributes of the manager."""
 
-        self.drop_speed = 10
-        self.fleet_direction = 1
-
-        self.game = game
-        self.stats = game.stats
-        self.screen = game.screen
-        self.screen_rect = game.screen.get_rect()
-        self.ship = game.ship
+        self.screen = screen_rect
+        self.screen_rect = screen_rect
 
         self.aliens = pg.sprite.Group()
 
-    def create_fleet(self):
+    def generate(self):
         """Create a fleet of aliens."""
-        alien = Alien(self.game)
-        alien_width, alien_height = alien.rect.size
 
-        x, y = alien_width, alien_height
+        alien = Alien(self.screen, self.screen_rect)
+        x, y = Alien.Size
 
-        while y < (self.screen_rect.bottom - (5 * alien_height)):
-            while x < (self.screen_rect.right - (3 * alien_width)):
+        while y < (self.screen_rect.bottom - (5 * Alien.Size[0])):
+            while x < (self.screen_rect.right - (3 * Alein.Size[1])):
                 self.create_alien(x, y)
-                x += 3 * alien_width
+                x += 3 * Alien.Size[0]
 
-            x = alien_width
-            y += 2 * alien_height
+            x = Alien.Size[0]
+            y += 2 * Alien.Size[1]
 
     def create_alien(self, x, y):
         """Creates a new alien in the specified position."""
 
-        alien = Alien(self.game)
+        alien = Alien(self.screen, self.screen_rect)
         alien.x = x
 
         alien.rect.x = x
@@ -46,8 +42,9 @@ class FleetManager:
 
     def update(self):
         """Update alien positions."""
+
         self._check_fleet_edges()
-        self.aliens.update(self.fleet_direction)
+        self.aliens.update(Fleet.Direction)
 
     def draw(self):
         """Draw the fleet."""
@@ -62,8 +59,9 @@ class FleetManager:
 
         for alien in self.aliens.sprites():
             if alien.reached_bottom():
-                self.game.lose_life()
-                return
+                return True
+
+        return False
 
     def _check_fleet_edges(self):
         """Checks if the fleet has reached the edge of the screen."""
@@ -77,7 +75,7 @@ class FleetManager:
         """Changes the direction the fleet is going."""
 
         for alien in self.aliens.sprites():
-            alien.rect.y += self.drop_speed
+            alien.rect.y += Fleet.DropSpeed
 
-        self.fleet_direction *= -1
+        Flet.Direction *= -1
 

@@ -8,16 +8,20 @@ class Powerup(Sprite):
     Cooldown = 10000
     Limit = 15
 
-    def __init__(self, game):
+    def __init__(self, screen, screen_rect):
         """Initialise the attributes of a powerup."""
 
         super().__init__()
 
-        self.screen = game.screen
-        self.screen_rect = game.screen.get_rect()
+        self.screen = screen
+        self.screen_rect = screen_rect
 
         self.y = 0
+        self.x = 0
         self.sprite_count = 0
+        self.rect = None
+        self.active = False
+        self.bullet_count = 1
 
         self._load_images() 
         self.reset_rect()
@@ -37,7 +41,9 @@ class Powerup(Sprite):
             
     def reset_rect(self):
         self.x = random.randint(10, self.screen_rect.right - 10)
-        self.rect = pg.Rect((self.x, 0), (20, 20))
+        self.y = 0
+
+        self.rect = pg.Rect((self.x, self.y), (20, 20))
 
     def _load_images(self):
         self.images = []

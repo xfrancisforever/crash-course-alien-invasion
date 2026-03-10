@@ -3,13 +3,13 @@ from button import Button
 class Menu:
     """Manage game menus and UI"""
 
-    def __init__(self, game):
+    ButtonSize = (200, 50)
+
+    def __init__(self, screen, screen_rect):
         """Initialise the game menu."""
 
-        self.game = game
-        self.settings = game.settings
-        self.screen = game.screen
-        self.screen_rect = self.screen.get_rect()
+        self.screen = screen
+        self.screen_rect = screen_rect
 
         self._create_play_button()
         self._create_difficulty_buttons()
@@ -19,7 +19,7 @@ class Menu:
 
         self.play_button = Button(
             self, 
-            self.settings.button_size, 
+            Menu.ButtonSize
             self.screen_rect.center, 
             "Play"
         )
@@ -28,18 +28,29 @@ class Menu:
         """Creates the difficulty button objects."""
 
         screen_center = self.screen_rect.center
-        space_between = self.settings.button_size[0] * 1.25
+        space_between = Menu.ButtonSize * 1.25
             
         self.difficulty_buttons = {
-            'easy': Button(self, self.settings.button_size, 
-                          (screen_center[0] - space_between, 
-                          screen_center[1]), 'Easy'),
-            'normal': Button(self, self.settings.button_size,
-                            (screen_center[0], screen_center[1]),
-                            'Normal'),
-            'hard': Button(self, self.settings.button_size,
-                          (screen_center[0] + space_between,
-                          screen_center[1]), 'Hard')
+            'easy': Button(
+                self, Menu.ButtonSize, 
+                (screen_center[0] - space_between, 
+                screen_center[1]), 
+                'Easy'
+            ),
+            'normal': Button(
+                self, 
+                Menu.ButtonSize,
+                (screen_center[0], 
+                screen_center[1]),
+                'Normal'
+            ),
+            'hard': Button(
+                self, 
+                Menu.ButtonSize,
+                (screen_center[0] + space_between,
+                screen_center[1]), 
+                'Hard'
+            )
         }
 
     def draw_difficulty_menu(self):
@@ -50,24 +61,21 @@ class Menu:
 
     def draw_play_button(self):
         """Draws the play button on the game screen."""
-
         self.play_button.draw_button()
 
     def check_difficulty_buttons(self, mouse_pos):
+        """Checks if any difficulty button was pressed."""
+
         for difficulty, button in self.difficulty_buttons.items():
             collided = button.rect.collidepoint(mouse_pos)
 
             if collided:
-                self.game.difficulty_selected = True
-                return
+                return collided
 
         return None
 
     def check_play_button(self, mouse_pos):
+        """Checks if the play button was pressed."""
+
         collided = self.play_button.rect.collidepoint(mouse_pos)
-
-        if collided:
-            self.game.start_game()
-        else:
-            return None
-
+        return collided

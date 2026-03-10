@@ -8,16 +8,15 @@ class Bullet(Sprite):
     Height = 15
     Colour = (60, 60, 60)
 
-    def __init__(self, game, initial_midtop=None):
+    def __init__(self, screen, initial_pos):
         """Create a bullet object at the ship's current position."""
 
         super().__init__()
         
-        self.screen = game.screen
-        self.settings = game.settings
+        self.screen = screen
 
         self.rect = pg.Rect(0, 0, Bullet.Width, Bullet.Height)
-        self.rect.midtop = initial_midtop or game.ship.rect.midtop
+        self.rect.midtop = initial_pos
 
         self.y = float(self.rect.y)
 

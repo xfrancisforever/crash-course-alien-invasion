@@ -10,14 +10,23 @@ class Scoreboard:
     TextColour = (30, 30, 30)
     Font = pg.font.SysFont(None, 48)
 
-    def __init__(self, game):
+    def __init__(self, screen, screen_rect, game_stats):
         """Initialise scoreboard attributes."""
 
-        self.game = game
-        self.screen = game.screen
-        self.screen_rect = self.screen.get_rect()
-        self.settings = game.settings
-        self.stats = game.stats
+        self.screen = screen
+        self.screen_rect = screen_rect
+        self.bg_colour = screen.get_palette_at()
+
+        self.game_stats = game_stats
+
+        self.score_image = None
+        self.high_score_image = None
+        self.level_image = None
+        self.ships = []
+
+        self.score_reect = None
+        self.high_score_rect = None
+        self.level_rect = None
 
         self.prep_score()
         self.prep_high_score()
@@ -29,11 +38,12 @@ class Scoreboard:
             
         rounded_score = round(self.stats.score, -1)
         score_str = f'{rounded_score:,}'
+
         self.score_image = Scoreboard.Font.render(
             score_str,
             True,
             Scoreboard.TextColour,
-            self.settings.bg_colour
+            self.bg_colour
         )
 
         self.score_rect = self.score_image.get_rect()
@@ -50,7 +60,7 @@ class Scoreboard:
             high_score_str,
             True,
             Scoreboard.TextColour,
-            self.settings.bg_colour
+            self.bg_colour
         )
 
         self.high_score_rect = self.high_score_image.get_rect()
@@ -65,7 +75,7 @@ class Scoreboard:
             level_str,
             True,
             Scoreboard.TextColour,
-            self.settings.bg_colour
+            self.bg_colour
         )
 
         self.level_rect = self.level_image.get_rect()
@@ -75,8 +85,6 @@ class Scoreboard:
 
     def prep_ships(self):
         """Show how many ships are left."""
-
-        self.ships = []
 
         for n in range(self.stats.ships_left):
             rect = Ship.Image.get_rect()

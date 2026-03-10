@@ -9,14 +9,13 @@ class Alien(Sprite):
     Size = (40, 39)
     Image = pg.image.load('images/alien.bmp')
 
-    def __init__(self, game):
+    def __init__(self, screen, screen_rect):
         """Initialise the alien and set its starting position."""
 
         super().__init__()
 
-        self.screen = game.screen
-        self.screen_rect = game.screen.get_rect()
-        self.settings = game.settings
+        self.screen = screen
+        self.screen_rect = screen_rect
 
         self.image = pg.transform.scale(Alien.Image, Alien.Size)
         self.rect = Alien.Image.get_rect()

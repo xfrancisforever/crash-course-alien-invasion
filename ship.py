@@ -7,14 +7,13 @@ class Ship(Sprite):
     Speed = 1.5
     Image = pygame.image.load('images/ship.bmp')
 
-    def __init__(self, ai_game):
+    def __init__(self, screen, screen_rect):
         """Initialise the ship and set its starting position."""
+
         super().__init__()
 
-        self.screen = ai_game.screen
-        self.settings = ai_game.settings
-
-        self.screen_rect = ai_game.screen.get_rect()
+        self.screen = screen
+        self.screen_rect = screen_rect
 
         # Image
         self.rect = Ship.Image.get_rect()
@@ -31,6 +30,7 @@ class Ship(Sprite):
 
     def update(self):
         """Update the ship's position based on the movement flag."""
+
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += Ship.Speed
         if self.moving_left and self.rect.left > 0:
