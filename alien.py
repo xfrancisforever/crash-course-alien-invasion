@@ -4,8 +4,7 @@ from pygame.sprite import Sprite
 class Alien(Sprite):
     """A class to represent a single alien in the fleet."""
 
-    Points = 10
-    Speed = 0.8
+    Points = None
     Size = (40, 39)
     Image = pg.image.load('images/alien.bmp')
 
@@ -26,17 +25,9 @@ class Alien(Sprite):
 
         self.x = float(self.rect.x)
 
-    def update(self, direction):
-        """
-        Move the alien sideways.
-        
-        Args: 
-            direction: -1 or 1 to express left or right
-        """
-
-        self.x += Alien.Speed * direction 
-        self.rect.x = self.x
-
+    def draw(self):
+        """Draws the alien on the screen."""
+        self.screen.blit(self.image, self.rect)
 
     def check_edges(self):
         """Return boolean representing if the alien has hit the edge."""
@@ -49,7 +40,3 @@ class Alien(Sprite):
         """Checks if the alien has reached the bottom of the screen."""
         return self.rect.bottom > self.screen_rect.bottom
 
-    @staticmethod
-    def increase_difficulty():
-        Alien.Speed *= 1.5
-        Alien.Points += 1

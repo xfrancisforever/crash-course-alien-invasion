@@ -18,7 +18,7 @@ class CollisionsManager:
         return collisions
 
     @staticmethod
-    def check_powerups_collision(self, ship, powerups):
+    def check_powerups_collision(ship, powerups):
         """Checks collisions between powerups and the ship."""
         collisions = pg.sprite.spritecollideany(ship, powerups)
         return collisions

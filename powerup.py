@@ -5,7 +5,6 @@ from pygame.sprite import Sprite
 class Powerup(Sprite):
     """Class to represent a powerup for Alien Invasion."""
 
-    Cooldown = 10000
     Limit = 15
 
     def __init__(self, screen, screen_rect):
@@ -36,22 +35,18 @@ class Powerup(Sprite):
 
     def draw(self):
         """Draws the powerup on the screen if it's active."""
+        current_sprite = self.images[self.sprite_count // 6]
+        self.screen.blit(current_sprite, self.rect)
 
-        if self.active:
-            current_sprite = self.images[self.sprite_count // 6]
-            self.screen.blit(current_sprite, self.rect)
-
-            if self.sprite_count < 59:
-                self.sprite_count += 1
-            else:
-                self.sprite_count = 0
+        if self.sprite_count < 59:
+            self.sprite_count += 1
+        else:
+            self.sprite_count = 0
 
     def update(self):
         """Updates th powerup if it's active."""
-
-        if self.active:
-            self.y = float(self.y + 1.5)
-            self.rect.y = self.y
+        self.y = float(self.y + 1.5)
+        self.rect.y = self.y
             
     def reset_rect(self):
         self.x = random.randint(10, self.screen_rect.right - 10)

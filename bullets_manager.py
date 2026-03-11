@@ -10,6 +10,9 @@ class BulletsManager:
         self.screen = screen
         self.ship = ship
 
+        self.cooldown = None
+        self.speed = None
+
         # Bullets
         self.bullets = pg.sprite.Group()
 
@@ -27,18 +30,25 @@ class BulletsManager:
 
     def update(self):
         """Update bullet positions."""
-        self.bullets.update()
+        for bullet in self.bullets:
+            bullet.y -= self.speed
+            bullet.rect.y -= self.speed
 
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+
+    def draw(self):
+        """Draws all bullets."""
+        for bullet in self.bullets:
+            bullet.draw()
 
     def fire(self):
         """Shoots a single bullet from the game's ship."""
         self.bullets.add(
             Bullet(
                 self.screen, 
-                position=self.ship.rect.midtop
+                self.ship.rect.midtop
             )
         )
 
@@ -51,21 +61,42 @@ class BulletsManager:
             self.bullets.add(
                 Bullet(
                     self.screen, 
-                    position=(offset, ship_top[1])
+                    (offset, ship_top[1])
                 )
             )
 
-    def check_cooldown(self):
+    def check_cooldown(self, dt):
         """Returns a boolean telling if  the cooldown is over."""
-        tick = self.cooldown_clock.tick()
-
-        cooldown_done = tick + self.cooldown_count >= Bullet.Cooldown
+        cooldown_over = self.cooldown_count >= self.cooldown
         initial_fire = self.cooldown_count == -1
 
-        if cooldown_done or initial_fire:
+        if cooldown_over or initial_fire:
             self.cooldown_count = 0
             return True
         else:
-            self.cooldown_count += tick
+            self.cooldown_count += dt
             return False
 
+    def increase_speed(self):
+        """Increases the bullets speed."""
+        self.speed *= 1.2
+        
+        if self.cooldown > 100:
+            self.cooldown -= 25
+
+    def update_cooldown(self, dt):
+        """Updates the bullets cooldown."""
+        self.cooldown_count += dt
+
+    def set_difficulty(self, difficulty):
+        """Set the bullets attributes according to difficulty."""
+        match difficulty:
+            case 'easy':
+                self.cooldown = 300
+                self.speed = 2.0
+            case 'normal':
+                self.cooldown = 400
+                self.speed = 1.7
+            case 'hard':
+                self.cooldown = 500
+                self.speed = 1.4

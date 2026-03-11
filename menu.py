@@ -71,7 +71,7 @@ class Menu:
             collided = button.rect.collidepoint(mouse_pos)
 
             if collided:
-                return collided
+                return difficulty
 
         return None
 

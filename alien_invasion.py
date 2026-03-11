@@ -23,7 +23,7 @@ class AlienInvasion:
 
         # Game status
         self.game_active = False
-        self.difficulty_selected = False
+        self.difficulty = None
 
         self.game_stats = GameStats()
 
@@ -92,7 +92,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
-            self._call_bullet_trigger()
+            self._call_bullets_trigger()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -107,19 +107,21 @@ class AlienInvasion:
         """Handle mouse clicks."""
         mouse_pos = pygame.mouse.get_pos()
 
-        if not self.difficulty_selected:
-            self.menu.check_difficulty_buttons(mouse_pos)
+        if not self.difficulty:
+            self.difficulty = self.menu.check_difficulty_buttons(mouse_pos)
+            self._set_difficulty()
+
         elif not self.game_active:
-            self.menu.check_play_button(mouse_pos)
+            clicked = self.menu.check_play_button(mouse_pos)
+            self.game_active = clicked
 
     def _update_screen(self):
         """Executes all the changes in a frame."""
         self.screen.fill(AlienInvasion.BgColour)
-        self.dt = self.clock.tick()
+        self.dt = self.clock.tick(60)
 
         if self.game_active:
             self._update_gameplay()
-            self._check_collisions()
 
         self._draw_gameplay()
         self._draw_menu()
@@ -131,7 +133,7 @@ class AlienInvasion:
         """Start a new game."""
         self.game_active = True
 
-        self.stats.reset_stats()
+        self.game_stats.reset_stats()
         self._reposition_elements()        
 
         self.scoreboard.prep_score()
@@ -142,25 +144,25 @@ class AlienInvasion:
 
     def _new_level(self):
         """Increases the difficulty and level of the game."""
-        self.stats.level += 1
+        self.game_stats.level += 1
 
         self._reposition()
         self.scoreboard.prep_level()
 
-        Ship.increase_speed()
-        Alien.increase_difficulty()
-        Bullet.increase_speed()
+        self.fleet.increase_speed()
+        self.ship.increase_speed()
+        self.bullets_manager.increase_speed()
 
         pygame.time.delay(1000)
 
     def _lose_life(self):
         """Respond to the ship being hit by an alien."""
-        if self.stats.ships_left > 0:
-            self.stats.ships_left -= 1
+        if self.game_stats.ships_left > 0:
+            self.game_stats.ships_left -= 1
             self._reposition_elements()
         else:
             self.game_active = False
-            self.difficulty_selected = False
+            self.difficulty = None
         
         self.scoreboard.prep_ships()
         pygame.time.delay(1000)
@@ -177,6 +179,8 @@ class AlienInvasion:
 
     def _update_gameplay(self):
         """Updates the gameplay elements."""
+        self._call_generate_powerup()
+
         self.ship.update()
         self.fleet.update()
         self.bullets_manager.update()
@@ -188,33 +192,37 @@ class AlienInvasion:
 
         self.fleet.check_bottom_reached()
 
-        if fleet.is_empty():
+        self._update_cooldowns()
+
+        if not self.aliens:
             self._new_level()
 
-    def _call_alien_collision(self):
+    def _call_aliens_collision(self):
         """Lose a life with any alien collision."""
-        alien_collided = CollisionsManager.check_alien_collision(
+        collided_alien = CollisionsManager.check_aliens_collision(
             self.ship,
             self.aliens
         )
 
-        if alien_collided:
+        if collided_alien:
             self._lose_life()
-
 
     def _call_powerups_collision(self):
         """Activate a powerup with its collision."""
-        powerup_collided = CollisionsManager.check_powerups_collision(
-            self.ship,
-            self.powerups
-        )
+        if self.powerups:
+            collided_powerup = CollisionsManager.check_powerups_collision(
+                self.ship,
+                self.powerups
+            )
 
-        if powerup_collided:
-            powerup_collided.active = True
+            if collided_powerup:
+                self.powerups.remove(collided_powerup)
+                collided_powerup.active = True
 
     def _call_bullets_trigger(self):
         """Calls the bullet trigger with powerups."""
         powerups = self.powerups_manager.get_active_powerups()
+
         if self.bullets_manager.check_cooldown(self.dt):
             if powerups:
                 for powerup in powerups:
@@ -223,26 +231,41 @@ class AlienInvasion:
             else:
                 self.bullets_manager.fire()
 
+    def _call_generate_powerup(self):
+        """Generates powerups if the cooldown is over."""
+        if self.powerups_manager.check_cooldown():
+            self.powerups_manager.generate_powerup()
+
+    def _update_cooldowns(self):
+        """Updates the cooldown of every gameplay elements."""
+        self.bullets_manager.update_cooldown(self.dt)
+        self.powerups_manager.update_cooldown(self.dt)
+                
+    def _set_difficulty(self):
+        """Changes the game elements to adapt to the difficulty."""
+        self.fleet.set_difficulty(self.difficulty)
+        self.ship.set_difficulty(self.difficulty)
+        self.bullets_manager.set_difficulty(self.difficulty)
 
     def _reposition(self):
         """Repositions elements for a new round."""
-        self.bullets.clear()
-        self.aliens.clear()
-        self.powerups.clear()
+        self.bullets.empty()
+        self.aliens.empty()
+        self.powerups.empty()
 
-        self.fleet.create_fleet()
+        self.fleet.generate()
         self.ship.center_ship()
 
     def _draw_gameplay(self):
         """Draws the gameplay elements."""
         self.ship.draw()
-        self.aliens.draw(self.screen)
-        self.bullets.draw(self.screen)
-        self.powerups.draw(self.screen)
+        self.fleet.draw()
+        self.bullets_manager.draw()
+        self.powerups_manager.draw()
 
     def _draw_menu(self):
         """Draws menu according to status."""
-        if not self.difficulty_selected:
+        if not self.difficulty:
             self.menu.draw_difficulty_menu()
         elif not self.game_active:
             self.menu.draw_play_button()
