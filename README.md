@@ -12,6 +12,8 @@ spawns recurringly that increases the quantity of the bullets shot.
 # Commands
 
 Q - Quits the game
+
 Left/Right Arrows - Movement
+
 Spacebar - Shoot bullet
 
