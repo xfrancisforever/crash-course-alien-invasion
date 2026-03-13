@@ -21,20 +21,30 @@ class AlienInvasion:
         """Initialise the game, and create game resources."""
         pygame.init()
 
-        # Game status
+        # Game attributes
         self.game_active = False
         self.difficulty = None
-
         self.game_stats = GameStats()
 
         # Screen
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen_rect = self.screen.get_rect()
 
-        # Related classes
+        # Gameplay objects
         self.ship = Ship(self.screen, self.screen_rect) 
         self.fleet = FleetManager(self.screen, self.screen_rect)
 
+        self.powerups_manager = PowerupManager(
+            self.screen, 
+            self.screen_rect
+        )
+
+        self.bullets_manager = BulletsManager(
+            self.screen, 
+            self.ship
+        )
+
+        # Visual objects
         self.menu = MenuManager(self.screen, self.screen_rect)
 
         self.scoreboard = ScoreboardManager(
@@ -44,15 +54,7 @@ class AlienInvasion:
             AlienInvasion.BgColour
         )
 
-        self.powerups_manager = PowerupManager(
-            self.screen, 
-            self.screen_rect
-        )
-        self.bullets_manager = BulletsManager(
-            self.screen, 
-            self.ship
-        )
-
+        # Manager groups
         self.bullets = self.bullets_manager.bullets
         self.powerups = self.powerups_manager.powerups
         self.active_powerups = self.powerups_manager.active_powerups
