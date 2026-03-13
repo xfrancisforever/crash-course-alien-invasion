@@ -1,5 +1,5 @@
 import pygame
-from button_styles import ButtonStyles
+from data.button_styles import ButtonStyles
 
 class Button:
     "A class to build buttons for the game."""

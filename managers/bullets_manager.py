@@ -1,10 +1,9 @@
 import pygame as pg
-from bullet import Bullet
-from powerup import Powerup
+from models.bullet import Bullet
 
 class BulletsManager:
     """Class to manage bullets in an alien invasion game."""
-    def __init__(self, screen, ship, powerup):
+    def __init__(self, screen, ship):
         """Initialise the attributes of the bullet manager."""
         # Dependencies
         self.screen = screen
@@ -19,14 +18,6 @@ class BulletsManager:
         # Settings
         self.cooldown_clock = pg.time.Clock()
         self.cooldown_count = -1
-
-    def trigger(self, powerups=None):
-        """Create a new bullet and add it to the bullets group."""
-        if self._check_cooldown():
-            if powerups:
-                self._powered_fire()
-            else:
-                self._fire()
 
     def update(self):
         """Update bullet positions."""
@@ -82,7 +73,7 @@ class BulletsManager:
         self.speed *= 1.2
         
         if self.cooldown > 100:
-            self.cooldown -= 25
+            self.cooldown -= 20
 
     def update_cooldown(self, dt):
         """Updates the bullets cooldown."""
@@ -92,11 +83,11 @@ class BulletsManager:
         """Set the bullets attributes according to difficulty."""
         match difficulty:
             case 'easy':
-                self.cooldown = 300
+                self.cooldown = 340
                 self.speed = 2.0
             case 'normal':
-                self.cooldown = 400
-                self.speed = 1.7
+                self.cooldown = 420
+                self.speed = 1.8
             case 'hard':
-                self.cooldown = 500
-                self.speed = 1.4
+                self.cooldown = 480
+                self.speed = 1.6

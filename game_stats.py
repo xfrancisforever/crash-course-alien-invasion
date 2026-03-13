@@ -12,3 +12,8 @@ class GameStats:
         self.score = 0
         self.level = 0
 
+    def update_scores(self, new_score):
+        """Adds to the score and updates the high score."""
+        self.score += new_score
+        if self.score > self.high_score:
+            self.high_score = self.score

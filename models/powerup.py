@@ -19,7 +19,6 @@ class Powerup(Sprite):
         self.x = 0
         self.sprite_count = 0
         self.rect = None
-        self.active = False
         self.bullet_count = 1
 
         self._load_images() 
@@ -31,7 +30,7 @@ class Powerup(Sprite):
             self.bullet_count += 1
         else:
             self.bullet_count = 1
-            self.active = False
+            self.kill()
 
     def draw(self):
         """Draws the powerup on the screen if it's active."""

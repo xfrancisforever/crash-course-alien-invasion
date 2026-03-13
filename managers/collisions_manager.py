@@ -1,6 +1,4 @@
 import pygame as pg
-from functools import reduce
-from alien import Alien
 
 class CollisionsManager:
     """Class to manage every collision in the game."""

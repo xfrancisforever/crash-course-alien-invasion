@@ -1,10 +1,10 @@
 import pygame as pg
-from ship import Ship
+from models.ship import Ship
 
 SCREEN_GAP = 20
 PADDING = 10
 
-class Scoreboard:
+class ScoreboardManager:
     """Class to display the player stats while the game is running."""
 
     TextColour = (30, 30, 30)
@@ -24,7 +24,7 @@ class Scoreboard:
         self.level_image = None
         self.ships = []
 
-        self.score_reect = None
+        self.score_rect = None
         self.high_score_rect = None
         self.level_rect = None
 
@@ -35,14 +35,13 @@ class Scoreboard:
 
     def prep_score(self):
         """Turn the score into a rendered image."""
-            
         rounded_score = round(self.game_stats.score, -1)
         score_str = f'{rounded_score:,}'
 
-        self.score_image = Scoreboard.Font.render(
+        self.score_image = ScoreboardManager.Font.render(
             score_str,
             True,
-            Scoreboard.TextColour,
+            ScoreboardManager.TextColour,
             self.bg_colour
         )
 
@@ -56,10 +55,10 @@ class Scoreboard:
         high_score = round(self.game_stats.high_score, -1)
         high_score_str = f'{high_score:,}'
 
-        self.high_score_image = Scoreboard.Font.render(
+        self.high_score_image = ScoreboardManager.Font.render(
             high_score_str,
             True,
-            Scoreboard.TextColour,
+            ScoreboardManager.TextColour,
             self.bg_colour
         )
 
@@ -71,10 +70,10 @@ class Scoreboard:
         """Turn the level into a rendered image."""
 
         level_str = str(self.game_stats.level)
-        self.level_image = Scoreboard.Font.render(
+        self.level_image = ScoreboardManager.Font.render(
             level_str,
             True,
-            Scoreboard.TextColour,
+            ScoreboardManager.TextColour,
             self.bg_colour
         )
 
@@ -85,6 +84,7 @@ class Scoreboard:
 
     def prep_ships(self):
         """Show how many ships are left."""
+        self.ships = []
 
         for n in range(self.game_stats.ships_left):
             rect = Ship.Image.get_rect()

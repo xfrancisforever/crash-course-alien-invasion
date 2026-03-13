@@ -48,11 +48,11 @@ class Ship(Sprite):
         """Change the ship stats according to difficulty."""
         match difficulty:
             case 'easy':
-                Ship.Speed = 1.2
+                Ship.Speed = 2.0
             case 'normal':
-                Ship.Speed = 1.5
-            case 'hard':
                 Ship.Speed = 1.8
+            case 'hard':
+                Ship.Speed = 1.5
 
     @staticmethod
     def increase_speed():

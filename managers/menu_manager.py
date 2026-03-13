@@ -1,6 +1,6 @@
-from button import Button
+from models.button import Button
 
-class Menu:
+class MenuManager:
     """Manage game menus and UI"""
 
     ButtonSize = (200, 50)
@@ -19,7 +19,7 @@ class Menu:
 
         self.play_button = Button(
             self.screen, 
-            Menu.ButtonSize,
+            MenuManager.ButtonSize,
             self.screen_rect.center, 
             "Play"
         )
@@ -28,26 +28,26 @@ class Menu:
         """Creates the difficulty button objects."""
 
         screen_center = self.screen_rect.center
-        space_between = Menu.ButtonSize[0] * 1.25
+        space_between = MenuManager.ButtonSize[0] * 1.25
             
         self.difficulty_buttons = {
             'easy': Button(
                 self.screen, 
-                Menu.ButtonSize, 
+                MenuManager.ButtonSize, 
                 (screen_center[0] - space_between, 
                 screen_center[1]), 
                 'Easy'
             ),
             'normal': Button(
                 self.screen, 
-                Menu.ButtonSize,
+                MenuManager.ButtonSize,
                 (screen_center[0], 
                 screen_center[1]),
                 'Normal'
             ),
             'hard': Button(
                 self.screen, 
-                Menu.ButtonSize,
+                MenuManager.ButtonSize,
                 (screen_center[0] + space_between,
                 screen_center[1]), 
                 'Hard'

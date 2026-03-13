@@ -1,6 +1,6 @@
 import random
 import pygame as pg
-from powerup import Powerup
+from models.powerup import Powerup
 
 class PowerupManager:
     """Class to manage the powerups."""
@@ -9,27 +9,18 @@ class PowerupManager:
         self.screen = screen
         self.screen_rect = screen_rect
 
-        self.cooldown = 100
+        self.cooldown = 15000
         self.cooldown_count = 0
 
         self.powerups = pg.sprite.Group()
+        self.active_powerups = pg.sprite.Group()
 
     def generate_powerup(self):
         """Randomly draws the powerup if the cooldown is over."""
-#        if random.random() < 0.1:
-        self.powerups.add(Powerup(self.screen, self.screen_rect))
-        self.cooldown_count = 0
+        if random.random() < 0.05:
+            self.powerups.add(Powerup(self.screen, self.screen_rect))
+            self.cooldown_count = 0
 
-    def get_active_powerups(self):
-        """Returns all active powerups."""
-        active_powerups = []
-
-        for powerup in self.powerups:
-            if powerup.active:
-                active_powerups.append(powerup)
-
-        return active_powerups
-    
     def update(self):
         """Updates the powerup and clears it if not caught."""
         self.powerups.update()
@@ -51,4 +42,7 @@ class PowerupManager:
 
     def check_cooldown(self):
         """Checks if the cooldown is over."""
-        return self.cooldown_count > self.cooldown
+        cooldown_over = self.cooldown_count > self.cooldown
+        powerup_on_screen = bool(self.powerups)
+
+        return cooldown_over and not powerup_on_screen

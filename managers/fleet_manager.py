@@ -1,7 +1,7 @@
 import pygame as pg
-from alien import Alien
+from models.alien import Alien
 
-class Fleet:
+class FleetManager:
     """Manages the alien fleet."""
     def __init__(self, screen, screen_rect):
         """Initialises attributes of the manager."""
@@ -55,13 +55,13 @@ class Fleet:
 
         match difficulty:
             case 'easy':
-                self.speed = 0.3
+                self.speed = 0.8
                 Alien.Points = 8
             case 'normal':
-                self.speed = 0.4
+                self.speed = 1.1
                 Alien.Points = 10
             case 'hard':
-                self.speed = 0.5
+                self.speed = 1.5
                 Alien.Points = 12
 
     def is_empty(self):
@@ -76,10 +76,6 @@ class Fleet:
 
         return False
 
-    def increase_speed(self):
-        """Increases the fleet stats."""
-        self.speed *= 1.2
-
     def _check_fleet_edges(self):
         """Checks if the fleet has reached the edge of the screen."""
         for alien in self.aliens.sprites():
@@ -93,3 +89,9 @@ class Fleet:
             alien.rect.y += self.drop_speed
 
         self.direction *= -1
+
+    def increase_speed(self):
+        """Increases the fleet stats."""
+        self.speed *= 1.1
+        Alien.Points += 1
+
